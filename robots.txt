@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /lib/
+Disallow: /database/
+Disallow: /config.php
+Disallow: /config.example.php

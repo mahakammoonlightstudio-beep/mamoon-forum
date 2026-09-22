@@ -1,0 +1,16 @@
+# Kredensial lokal (JANGAN pernah di-commit)
+config.php
+
+# Konten yang diunggah pengguna (tapi .htaccess pelindung tetap ikut)
+uploads/*
+!uploads/.htaccess
+
+# Cadangan & dump data lokal
+*.bak
+if0_*.sql
+logo-forum-fullres.png
+
+# File sistem
+.DS_Store
+Thumbs.db
+desktop.ini

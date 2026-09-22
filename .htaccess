@@ -1,0 +1,57 @@
+# ============================================================
+# Mamoon Forum — konfigurasi Apache
+# Kompresi gzip + cache benar (HTML tidak dicache -> no "stuck")
+# ============================================================
+
+# ----- Kompresi gzip (hemat 60-80% ukuran transfer) -----
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# ----- Cache browser untuk aset statis -----
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/gif "access plus 1 month"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# ----- Halaman PHP dinamis: JANGAN dicache browser -----
+# (penyebab utama reply baru "tidak muncul"/halaman basi di versi lama)
+<IfModule mod_headers.c>
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# ----- Keamanan dasar -----
+Options -Indexes
+ServerSignature Off
+
+# Blokir akses web langsung ke file sensitif
+<FilesMatch "^(config\.php|config\.example\.php)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<FilesMatch "\.(sql|bak|md|lock)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Blokir akses web ke folder internal
+RedirectMatch 403 ^/lib/
+RedirectMatch 403 ^/database/
