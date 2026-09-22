@@ -151,6 +151,25 @@ function honeypot_ok(): bool
     return ($_POST['website'] ?? '') === '';
 }
 
+/**
+ * URL tujuan kembali yang aman (anti open-redirect):
+ * hanya terima path relatif dalam situs yang diawali '/'.
+ */
+function back_url(string $fallback = 'index.php'): string
+{
+    $next = $_POST['next'] ?? $_GET['next'] ?? '';
+    if (!is_string($next) || $next === '') {
+        return $fallback;
+    }
+    $next = mb_substr($next, 0, 500);
+    if ($next[0] !== '/' || strpos($next, '//') === 0 || strpos($next, '/\\') === 0) {
+        return $fallback;
+    }
+    // Buang sesi/fragment agar tetap URL aman.
+    $parts = explode('#', $next)[0];
+    return $parts;
+}
+
 /** Bidang honeypot untuk form (disembunyikan via CSS). */
 function honeypot_field(): string
 {

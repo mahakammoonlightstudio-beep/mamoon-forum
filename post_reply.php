@@ -59,8 +59,12 @@ try {
     redirect($back . '&' . flash('error', $e->getMessage()));
 }
 
-$stmt = $conn->prepare('INSERT INTO posts (thread_id, content, image_path) VALUES (?, ?, ?)');
-bind_and_execute($stmt, 'iss', [$threadId, $content, $imagePath]);
+// Penulis balasan (bila login) untuk kredit reputasi.
+$author = current_user($conn);
+$userId = $author !== null ? (int)$author['id'] : null;
+
+$stmt = $conn->prepare('INSERT INTO posts (thread_id, user_id, content, image_path) VALUES (?, ?, ?, ?)');
+bind_and_execute($stmt, 'iiss', [$threadId, $userId, $content, $imagePath]);
 $stmt->close();
 
 $stmt = $conn->prepare('UPDATE threads SET bump_at = NOW() WHERE id = ?');

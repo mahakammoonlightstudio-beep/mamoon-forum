@@ -62,6 +62,8 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
 .nav-search input { border: 0; background: none; color: var(--text); font: inherit; width: 150px; outline: none; }
 .user-chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text); background: var(--accent-soft); border-radius: 999px; padding: 4px 12px 4px 8px; font-size: 13.5px; }
 .user-chip em { font-style: normal; color: var(--accent); font-size: 11.5px; text-transform: capitalize; }
+.user-chip .rep { display: inline-flex; align-items: center; gap: 3px; color: var(--ok); font-weight: 800; font-size: 12px; }
+.user-chip .rep .icon { width: 12px; height: 12px; }
 .user-chip:hover { text-decoration: none; }
 .inline-form { display: inline-flex; }
 
@@ -112,6 +114,15 @@ label { font-weight: 600; font-size: 13.5px; display: block; margin-bottom: 5px;
 .badge-pin { background: rgba(243, 156, 18, .15); color: #d98c0a; }
 .badge-lock { background: rgba(217, 72, 59, .12); color: var(--danger); }
 .chip { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; color: #fff; }
+.vote-score.pos { color: var(--ok); }
+.vote-score.neg { color: var(--danger); }
+
+/* ===== Sort tabs ===== */
+.sort-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.sort-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); background: var(--card); }
+.sort-tabs a:hover { text-decoration: none; color: var(--accent); border-color: var(--accent); }
+.sort-tabs a.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sort-tabs .icon { width: 14px; height: 14px; }
 
 /* ===== Sidebar ===== */
 .side-title { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; padding: 0 4px; }
@@ -125,6 +136,17 @@ label { font-weight: 600; font-size: 13.5px; display: block; margin-bottom: 5px;
 .op-post, .reply { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; }
 .op-post h2 { margin: 0 0 8px; font-size: 19px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .reply p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ===== Vote box ===== */
+.vote-box { display: inline-flex; align-items: center; gap: 2px; vertical-align: -3px; }
+.reply .vote-box { float: right; margin-left: 12px; }
+.reply-main { min-width: 0; }
+.vote-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted); cursor: pointer; padding: 0; transition: all .15s ease; }
+.vote-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.vote-btn .icon { width: 15px; height: 15px; }
+.vote-btn.voted-up { background: var(--accent-soft); color: var(--ok); border-color: var(--ok); }
+.vote-btn.voted-down { background: var(--accent-soft); color: var(--danger); border-color: var(--danger); }
+.vote-score { min-width: 30px; text-align: center; font-weight: 800; font-size: 14px; color: var(--muted); }
 .date { color: var(--muted); font-size: 12.5px; }
 .reply-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }

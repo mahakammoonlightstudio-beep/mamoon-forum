@@ -61,8 +61,12 @@ try {
     redirect('index.php?' . flash('error', $e->getMessage()));
 }
 
-$stmt = $conn->prepare('INSERT INTO threads (title, content, image_path, category_id) VALUES (?, ?, ?, ?)');
-bind_and_execute($stmt, 'sssi', [$title, $content, $imagePath, $catId]);
+// Pembuat thread (bila login) untuk kredit reputasi.
+$author  = current_user($conn);
+$userId  = $author !== null ? (int)$author['id'] : null;
+
+$stmt = $conn->prepare('INSERT INTO threads (title, content, image_path, category_id, user_id) VALUES (?, ?, ?, ?, ?)');
+bind_and_execute($stmt, 'sssii', [$title, $content, $imagePath, $catId, $userId]);
 $newId = (int)$conn->insert_id;
 $stmt->close();
 

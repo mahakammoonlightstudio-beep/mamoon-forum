@@ -22,7 +22,7 @@ function current_user(mysqli $db): ?array
         return null;
     }
 
-    $stmt = $db->prepare('SELECT id, username, role, reputation, avatar_url FROM users WHERE id = ? AND is_active = 1');
+    $stmt = $db->prepare('SELECT id, username, role, avatar_url FROM users WHERE id = ? AND is_active = 1');
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc() ?: null;
@@ -32,6 +32,42 @@ function current_user(mysqli $db): ?array
         unset($_SESSION['user_id']); // sesi basi
     }
     return $user;
+}
+
+/**
+ * Reputasi user = total skor vote (up − down) dari thread & balasan miliknya.
+ * Bisa - (negatif). 0 bila anonim / belum ada vote.
+ */
+function user_reputation(mysqli $db, int $userId): int
+{
+    if ($userId <= 0) {
+        return 0;
+    }
+    $score = 0;
+
+    $stmt = $db->prepare(
+        "SELECT COALESCE(SUM(CASE v.vote_type WHEN 'up' THEN 1 ELSE -1 END), 0) AS s
+         FROM votes v
+         JOIN threads t ON v.target_type = 'thread' AND v.target_id = t.id
+         WHERE t.user_id = ?"
+    );
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $score += (int)($stmt->get_result()->fetch_assoc()['s'] ?? 0);
+    $stmt->close();
+
+    $stmt = $db->prepare(
+        "SELECT COALESCE(SUM(CASE v.vote_type WHEN 'up' THEN 1 ELSE -1 END), 0) AS s
+         FROM votes v
+         JOIN posts p ON v.target_type = 'post' AND v.target_id = p.id
+         WHERE p.user_id = ?"
+    );
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $score += (int)($stmt->get_result()->fetch_assoc()['s'] ?? 0);
+    $stmt->close();
+
+    return $score;
 }
 
 /** Apakah user aktif punya peran moderator/admin? */

@@ -26,6 +26,9 @@ if ($catSlug !== '') {
 $q = trim((string)($_GET['q'] ?? ''));
 $q = mb_substr($q, 0, 100);
 
+// ---------- Urutan: terbaru / teratas (skor vote) ----------
+$sort = ($_GET['sort'] ?? 'new') === 'top' ? 'top' : 'new';
+
 // ---------- Pagination ----------
 $perPage = 20;
 $page    = max(1, (int)($_GET['p'] ?? 1));
@@ -55,13 +58,20 @@ $page       = min($page, $totalPages);
 $offset     = ($page - 1) * $perPage;
 
 // ---------- Daftar thread ----------
+$voteScoreSql = "(SELECT COALESCE(SUM(CASE v.vote_type WHEN 'up' THEN 1 ELSE -1 END), 0)
+                 FROM votes v WHERE v.target_type = 'thread' AND v.target_id = t.id) AS vote_score";
+$order = $sort === 'top'
+    ? 't.sticky DESC, vote_score DESC, t.bump_at DESC'
+    : 't.sticky DESC, t.bump_at DESC';
+
 $sql = "SELECT t.id, t.title, t.content, t.created_at, t.bump_at, t.sticky, t.locked,
         c.name AS cat_name, c.color AS cat_color, c.slug AS cat_slug,
-        (SELECT COUNT(*) FROM posts p WHERE p.thread_id = t.id) AS reply_count
+        (SELECT COUNT(*) FROM posts p WHERE p.thread_id = t.id) AS reply_count,
+        $voteScoreSql
         FROM threads t
         LEFT JOIN categories c ON c.id = t.category_id
         WHERE $where
-        ORDER BY t.sticky DESC, t.bump_at DESC
+        ORDER BY $order
         LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($sql);
 $types .= 'ii';
@@ -71,6 +81,11 @@ bind_and_execute($stmt, $types, $args);
 $threads = $stmt->get_result();
 $stmt->close();
 
+$rows = [];
+while ($r = $threads->fetch_assoc()) {
+    $rows[] = $r;
+}
+
 // ---------- Kategori untuk sidebar ----------
 $cats = $conn->query(
     'SELECT c.id, c.name, c.slug, c.color,
@@ -79,12 +94,23 @@ $cats = $conn->query(
 );
 
 /** URL pagination yang mempertahankan filter aktif. */
-function page_url(int $p, string $q, ?array $cat): string
+function page_url(int $p, string $q, ?array $cat, string $sort = 'new'): string
 {
     $parts = [];
     if ($q !== '')          $parts[] = 'q=' . rawurlencode($q);
     if ($cat !== null)      $parts[] = 'cat=' . rawurlencode((string)$cat['slug']);
+    if ($sort === 'top')    $parts[] = 'sort=top';
     if ($p > 1)             $parts[] = 'p=' . $p;
+    return 'index.php' . ($parts ? '?' . implode('&', $parts) : '');
+}
+
+/** URL ganti urutan yang mempertahankan filter aktif. */
+function sort_url(string $s, string $q, ?array $cat): string
+{
+    $parts = [];
+    if ($q !== '')          $parts[] = 'q=' . rawurlencode($q);
+    if ($cat !== null)      $parts[] = 'cat=' . rawurlencode((string)$cat['slug']);
+    if ($s === 'top')       $parts[] = 'sort=top';
     return 'index.php' . ($parts ? '?' . implode('&', $parts) : '');
 }
 
@@ -139,6 +165,11 @@ render_header($conn, $cat !== null ? (string)$cat['name'] : 'Diskusi');
       </form>
     </details>
 
+    <div class="sort-tabs">
+      <a href="<?= e(sort_url('new', $q, $cat)) ?>" class="<?= $sort === 'new' ? 'active' : '' ?>"><?= icon('clock') ?> Terbaru</a>
+      <a href="<?= e(sort_url('top', $q, $cat)) ?>" class="<?= $sort === 'top' ? 'active' : '' ?>"><?= icon('arrow-up') ?> Teratas</a>
+    </div>
+
     <div class="panel">
       <?php if ($total === 0): ?>
         <div class="empty-state">
@@ -146,8 +177,9 @@ render_header($conn, $cat !== null ? (string)$cat['name'] : 'Diskusi');
           <p>Belum ada thread di sini.<br>Jadilah yang pertama bikin thread!</p>
         </div>
       <?php else: ?>
-        <?php while ($row = $threads->fetch_assoc()): ?>
-          <a class="thread-card" href="thread.php?id=<?= (int)$row['id'] ?>">
+        <?php foreach ($rows as $row): ?>
+          <?php $tid = (int)$row['id']; $score = (int)$row['vote_score']; ?>
+          <a class="thread-card" href="thread.php?id=<?= $tid ?>">
             <h2>
               <?php if ((int)$row['sticky']): ?><span class="badge badge-pin"><?= icon('pin') ?>Pin</span><?php endif; ?>
               <?php if ((int)$row['locked']): ?><span class="badge badge-lock"><?= icon('lock') ?>Terkunci</span><?php endif; ?>
@@ -160,28 +192,29 @@ render_header($conn, $cat !== null ? (string)$cat['name'] : 'Diskusi');
             <div class="thread-meta">
               <span class="item"><?= icon('chat') ?> <?= (int)$row['reply_count'] ?> balasan</span>
               <span class="item"><?= icon('clock') ?> <?= e(time_ago((string)$row['bump_at'])) ?></span>
-              <span class="item">#<?= (int)$row['id'] ?></span>
+              <span class="item"><?= icon('arrow-up') ?> <?= $score ?></span>
+              <span class="item">#<?= $tid ?></span>
             </div>
           </a>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
       <?php endif; ?>
     </div>
 
     <?php if ($totalPages > 1): ?>
       <nav class="pagination" aria-label="Navigasi halaman">
-        <?php if ($page > 1): ?><a href="<?= e(page_url($page - 1, $q, $cat)) ?>">&larr; Sebelumnya</a><?php endif; ?>
+        <?php if ($page > 1): ?><a href="<?= e(page_url($page - 1, $q, $cat, $sort)) ?>">&larr; Sebelumnya</a><?php endif; ?>
         <?php
         $start = max(1, $page - 2);
         $end   = min($totalPages, $page + 2);
-        if ($start > 1) echo '<a href="' . e(page_url(1, $q, $cat)) . '">1</a>';
+        if ($start > 1) echo '<a href="' . e(page_url(1, $q, $cat, $sort)) . '">1</a>';
         for ($i = $start; $i <= $end; $i++) {
             echo $i === $page
                 ? '<span class="current">' . $i . '</span>'
-                : '<a href="' . e(page_url($i, $q, $cat)) . '">' . $i . '</a>';
+                : '<a href="' . e(page_url($i, $q, $cat, $sort)) . '">' . $i . '</a>';
         }
-        if ($end < $totalPages) echo '<a href="' . e(page_url($totalPages, $q, $cat)) . '">' . $totalPages . '</a>';
+        if ($end < $totalPages) echo '<a href="' . e(page_url($totalPages, $q, $cat, $sort)) . '">' . $totalPages . '</a>';
         ?>
-        <?php if ($page < $totalPages): ?><a href="<?= e(page_url($page + 1, $q, $cat)) ?>">Selanjutnya &rarr;</a><?php endif; ?>
+        <?php if ($page < $totalPages): ?><a href="<?= e(page_url($page + 1, $q, $cat, $sort)) ?>">Selanjutnya &rarr;</a><?php endif; ?>
       </nav>
     <?php endif; ?>
   </section>

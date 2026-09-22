@@ -26,6 +26,8 @@ function icon(string $name): string
         'clock'   => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
         'warn'    => '<circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/>',
         'check'   => '<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 5-5"/>',
+        'arrow-up'   => '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',
+        'arrow-down' => '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
     ];
     $p = $paths[$name] ?? $paths['chat'];
     return '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' . $p . '</svg>';
@@ -93,7 +95,8 @@ function render_header(mysqli $db, string $title, bool $showSearch = true): void
       </form>
       <?php endif; ?>
       <?php if ($user): ?>
-        <a class="user-chip" href="#" title="Reputasi: <?= (int)$user['reputation'] ?>"><?= icon('user') ?><span><?= e($user['username']) ?></span><em><?= e($user['role']) ?></em></a>
+        <?php $rep = user_reputation($db, (int)$user['id']); ?>
+        <a class="user-chip" href="#" title="Reputasi: <?= $rep ?>"><?= icon('user') ?><span><?= e($user['username']) ?></span><em><?= e($user['role']) ?></em><span class="rep" title="Reputasi"><?= icon('arrow-up') ?><?= $rep ?></span></a>
         <form method="post" action="logout.php" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost btn-icon" title="Keluar"><?= icon('logout') ?></button></form>
       <?php else: ?>
         <a class="btn btn-ghost" href="login.php">Masuk</a>

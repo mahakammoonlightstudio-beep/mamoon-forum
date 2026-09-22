@@ -18,6 +18,9 @@ Mamoon Forum adalah forum gaya imageboard/Reddit yang dioptimalkan untuk **kecep
 | 📌 **Sticky & Locked** | Pin thread penting, kunci thread yang sudah selesai |
 | 📄 **Pagination** | 20 thread/halaman di index, 15 balasan/halaman di thread |
 | 🖼️ **Kompresi gambar otomatis** | Upload di-resize maks 1280px → WebP/JPEG ~puluhan KB |
+| ⬆️ **Voting thread & balasan** | Upvote/downvote, klik ulang = batal, arah beda = pindah vote (tabel `votes`) |
+| 📶 **Sort Terbaru / Teratas** | Tab urutan thread: terbaru, atau teratas berdasar skor vote |
+| 🏅 **Reputasi otomatis** | Skor vote (up − down) dari semua thread & balasan milik user, tampil di header |
 | 🛡️ **Keamanan** | Prepared statements, CSRF token, honeypot anti-bot, rate limit, validasi MIME gambar, eksekusi PHP dimatikan di `uploads/` |
 | 🌙 **Tema gelap/terang** | Ikut preferensi sistem, tersimpan di localStorage |
 | 🔔 **Toast notification** | Notifikasi sukses/error, auto-hide |
@@ -44,7 +47,7 @@ Lalu upload semua file ke folder `htdocs/` hosting kamu (via FTP / File Manager 
 ### 2. Buat database
 
 **Instalasi baru** → import `database/schema.sql` lewat phpMyAdmin.
-**Upgrade dari versi lama** → import `database/upgrade.sql` (aman untuk data yang sudah ada).
+**Upgrade dari versi lama** → import `database/upgrade.sql`, lalu `database/upgrade-votes.sql` (aman untuk data yang sudah ada).
 
 ### 3. Konfigurasi
 
@@ -74,6 +77,7 @@ mamoon-forum/
 ├── thread.php         # Detail thread + balasan
 ├── post_thread.php    # Handler POST thread
 ├── post_reply.php     # Handler POST balasan
+├── vote.php           # Endpoint vote thread/balasan (POST)
 ├── mod_thread.php     # Aksi moderator (pin/lock/delete)
 ├── login.php          # Login (opsional)
 ├── register.php       # Daftar akun (opsional)
@@ -88,10 +92,12 @@ mamoon-forum/
 │   ├── helpers.php    # Session, CSRF, flash, rate limit, honeypot
 │   ├── auth.php       # Login/register/logout
 │   ├── images.php     # Kompresi gambar via GD
+│   ├── votes.php      # Skor vote, toggle/switch, widget vote box
 │   └── layout.php     # Header/footer + ikon SVG
 ├── database/
-│   ├── schema.sql     # Skema untuk instalasi baru
-│   └── upgrade.sql    # Upgrade dari database lama
+│   ├── schema.sql         # Skema untuk instalasi baru
+│   ├── upgrade.sql        # Upgrade dari database lama
+│   └── upgrade-votes.sql  # Tambah fitur voting (database lama)
 └── uploads/           # Gambar hasil upload (auto-created)
 ```
 
@@ -108,7 +114,9 @@ mamoon-forum/
 - Semua output di-escape (`htmlspecialchars`) (anti XSS).
 - Form POST dilindungi **CSRF token** per-session.
 - Upload gambar divalidasi dari **isi file** (bukan ekstensi), di-resize ulang via GD (membuang payload berbahaya), dan folder `uploads/` **tidak bisa mengeksekusi PHP**.
-- **Rate limit** per-IP untuk posting thread, balasan, login, dan register (tabel `rate_limits`).
+- **Rate limit** per-IP untuk posting thread, balasan, vote, login, dan register (tabel `rate_limits`).
+- **Vote** wajib login dan satu vote per user per target — dicegah duplikasi di level database (unique key).
+- **Reputasi** dihitung live dari vote yang diterima konten user (tidak bisa dimanipulasi lewat kolom manual).
 - **Honeypot field** menggagalan spam bot sederhana.
 - Password disimpan sebagai `password_hash()` bcrypt.
 
@@ -116,7 +124,7 @@ mamoon-forum/
 
 ## 🗺️ Roadmap
 
-- [ ] Voting thread/balasan (tabel `votes` sudah disiapkan)
+- [x] ~~Voting thread/balasan~~ (selesai — upvote/downvote dengan toggle)
 - [ ] Balasan bertingkat (nested comments, tabel `comments`)
 - [ ] Panel admin (kelola kategori & user)
 - [ ] Umpan RSS per-kategori

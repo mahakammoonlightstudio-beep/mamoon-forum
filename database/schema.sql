@@ -29,6 +29,7 @@ CREATE TABLE `threads` (
   `content`     TEXT NOT NULL,
   `image_path`  VARCHAR(500) DEFAULT NULL,
   `category_id` INT DEFAULT NULL,
+  `user_id`     INT DEFAULT NULL,
   `created_at`  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   `bump_at`     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   `sticky`      TINYINT(1) DEFAULT 0,
@@ -36,8 +37,12 @@ CREATE TABLE `threads` (
   PRIMARY KEY (`id`),
   KEY `idx_bump_at` (`bump_at`),
   KEY `idx_category` (`category_id`),
+  KEY `idx_user` (`user_id`),
   CONSTRAINT `fk_threads_category`
     FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
+    ON DELETE SET NULL,
+  CONSTRAINT `fk_threads_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
     ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -47,15 +52,20 @@ CREATE TABLE `threads` (
 CREATE TABLE `posts` (
   `id`         INT NOT NULL AUTO_INCREMENT,
   `thread_id`  INT NOT NULL,
+  `user_id`    INT DEFAULT NULL,
   `content`    TEXT NOT NULL,
   `image_path` VARCHAR(500) DEFAULT NULL,
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   PRIMARY KEY (`id`),
   KEY `idx_thread_id` (`thread_id`),
   KEY `idx_created_at` (`created_at`),
+  KEY `idx_user` (`user_id`),
   CONSTRAINT `fk_posts_thread`
     FOREIGN KEY (`thread_id`) REFERENCES `threads` (`id`)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_posts_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
@@ -75,6 +85,21 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Vote thread & balasan (satu vote per user per target)
+-- ------------------------------------------------------------
+CREATE TABLE `votes` (
+  `id`          INT NOT NULL AUTO_INCREMENT,
+  `user_id`     INT NOT NULL,
+  `target_type` ENUM('thread','post','comment') NOT NULL,
+  `target_id`   INT NOT NULL,
+  `vote_type`   ENUM('up','down') NOT NULL,
+  `created_at`  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_vote` (`user_id`, `target_type`, `target_id`),
+  KEY `idx_target` (`target_type`, `target_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------

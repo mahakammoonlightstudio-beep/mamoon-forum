@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/lib/layout.php';
+require_once __DIR__ . '/lib/votes.php';
 
 /** @var mysqli $conn */
 
@@ -50,6 +51,20 @@ bind_and_execute($stmt, 'iii', [$id, $perPage, $offset]);
 $replies = $stmt->get_result();
 $stmt->close();
 
+// ---------- Kumpulkan ID balasan + skor vote (batch, tanpa N+1) ----------
+$postIds   = [];
+$replyRows = [];
+while ($r = $replies->fetch_assoc()) {
+    $replyRows[] = $r;
+    $postIds[]   = (int)$r['id'];
+}
+$postScores  = vote_scores($conn, 'post', $postIds);
+$postMyVotes = $user !== null ? user_votes($conn, (int)$user['id'], 'post', $postIds) : [];
+
+$opScores = vote_scores($conn, 'thread', [$id]);
+$opScore  = $opScores[$id]['score'] ?? 0;
+$opMyVote = $user !== null ? (user_votes($conn, (int)$user['id'], 'thread', [$id])[$id] ?? null) : null;
+
 render_header($conn, (string)$thread['title']);
 ?>
 
@@ -70,6 +85,7 @@ render_header($conn, (string)$thread['title']);
       <img src="<?= e((string)$thread['image_path']) ?>" alt="Gambar thread" loading="lazy" style="max-width:420px">
     </a>
   <?php endif; ?>
+  <?= render_vote_box('thread', $id, $opScore, $opMyVote) ?>
   <div class="thread-meta">
     <span class="item"><span class="avatar" style="width:22px;height:22px;font-size:11px">A</span> Anonim</span>
     <span class="item"><?= icon('clock') ?> <?= e(time_ago((string)$thread['created_at'])) ?></span>
@@ -98,8 +114,11 @@ render_header($conn, (string)$thread['title']);
 
 <h3 style="margin:18px 0 10px"><?= $total ?> balasan</h3>
 
-<?php while ($post = $replies->fetch_assoc()): ?>
-  <article class="reply" id="p<?= (int)$post['id'] ?>">
+<?php foreach ($replyRows as $post): ?>
+  <?php $pid = (int)$post['id']; ?>
+  <article class="reply" id="p<?= $pid ?>">
+    <?= render_vote_box('post', $pid, $postScores[$pid]['score'] ?? 0, $postMyVotes[$pid] ?? null) ?>
+    <div class="reply-main">
     <div class="reply-head">
       <span class="avatar">A</span>
       <span class="reply-author">Anonim</span>
@@ -121,8 +140,9 @@ render_header($conn, (string)$thread['title']);
         <img src="<?= e((string)$post['image_path']) ?>" alt="Gambar balasan" loading="lazy" style="max-width:320px">
       </a>
     <?php endif; ?>
+    </div>
   </article>
-<?php endwhile; ?>
+<?php endforeach; ?>
 
 <?php if ($totalPages > 1): ?>
   <nav class="pagination" aria-label="Navigasi balasan">
