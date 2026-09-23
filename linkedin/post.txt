@@ -1,0 +1,15 @@
+Mamoon Forum: forum komunitas yang saya bangun dari nol dengan PHP murni - tanpa framework, tanpa CDN, tetap cepat.
+
+Setelah beberapa iterasi besar (v2.0.0), forum ini kini punya:
+
+- Voting thread dan balasan dengan anti-duplikat yang ditegakkan di level database (unique key), bukan cuma di sisi aplikasi
+- Sistem reputasi, halaman profil, dan edit konten oleh pembuatnya
+- Upload gambar yang direprocess ulang lewat GD - bukan sekadar dipindahkan - untuk membungkam kerentanan eksekusi kode
+- Autentikasi bcrypt dan perlindungan CSRF di seluruh form
+
+Prinsipnya sederhana: keamanan ditegakkan di lapisan yang tidak bisa dilewati browser.
+
+Coba langsung: https://mamoon-forum.rf.gd/
+Kode: https://github.com/mahakammoonlightstudio-beep/mamoon-forum
+
+#PHP #MySQL #WebDevelopment #OpenSource #Backend
