@@ -97,7 +97,7 @@ function render_header(mysqli $db, string $title, bool $showSearch = true): void
       <?php endif; ?>
       <?php if ($user): ?>
         <?php $rep = user_reputation($db, (int)$user['id']); ?>
-        <a class="user-chip" href="profile.php?u=<?= e((string)$user['username']) ?>" title="Reputasi: <?= $rep ?>"><?= icon('user') ?><span><?= e($user['username']) ?></span><em><?= e($user['role']) ?></em><span class="rep" title="Reputasi"><?= icon('arrow-up') ?><?= $rep ?></span></a>
+        <a class="user-chip" href="profile.php?u=<?= e((string)$user['username']) ?>" title="Reputasi: <?= $rep ?>"><?php if (!empty($user['avatar_url'])): ?><img class="chip-avatar" src="<?= e((string)$user['avatar_url']) ?>" alt="" width="20" height="20"><?php else: ?><?= icon('user') ?><?php endif; ?><span><?= e($user['username']) ?></span><em><?= e($user['role']) ?></em><span class="rep" title="Reputasi"><?= icon('arrow-up') ?><?= $rep ?></span></a>
         <form method="post" action="logout.php" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost btn-icon" title="Keluar"><?= icon('logout') ?></button></form>
       <?php else: ?>
         <a class="btn btn-ghost" href="login.php">Masuk</a>

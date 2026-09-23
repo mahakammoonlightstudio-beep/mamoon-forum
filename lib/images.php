@@ -11,10 +11,11 @@ require_once __DIR__ . '/../config.php';
 
 /**
  * Proses satu file upload ($_FILES['x']) menjadi gambar terkompresi di uploads/.
+ * $maxDim: sisi terpanjang hasil (default MAX_IMAGE_DIM; avatar pakai 256).
  * Return path relatif untuk disimpan ke DB, atau null bila tidak ada file.
  * Throw RuntimeException bila file tidak valid / gagal diproses.
  */
-function process_image_upload(array $file): ?string
+function process_image_upload(array $file, int $maxDim = MAX_IMAGE_DIM): ?string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
         return null;
@@ -61,8 +62,8 @@ function process_image_upload(array $file): ?string
 
     // Resize proporsional bila melebihi batas dimensi.
     $longest = max($w, $h);
-    if ($longest > MAX_IMAGE_DIM) {
-        $scale    = MAX_IMAGE_DIM / $longest;
+    if ($longest > $maxDim) {
+        $scale    = $maxDim / $longest;
         $newW     = max(1, (int)round($w * $scale));
         $newH     = max(1, (int)round($h * $scale));
         $resized  = imagecreatetruecolor($newW, $newH);

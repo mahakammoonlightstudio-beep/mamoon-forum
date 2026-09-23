@@ -87,7 +87,9 @@ render_header($conn, 'Profil ' . $profile['username']);
     <span class="avatar profile-avatar"><?= e($avatarLetter) ?></span>
   <?php endif; ?>
   <div>
-    <h2 style="margin:0"><?= e((string)$profile['username']) ?></h2>
+    <h2 style="margin:0"><?= e((string)$profile['username']) ?>
+      <?php if ($isMe): ?><a class="btn btn-ghost btn-sm" href="#edit-profil" style="margin-left:8px"><?= icon('user') ?> Edit profil</a><?php endif; ?>
+    </h2>
     <p class="thread-meta" style="margin-top:4px">
       <span class="item"><em class="role-tag"><?= e((string)$profile['role']) ?></em></span>
       <span class="item"><?= icon('clock') ?> Bergabung <?= e($joined) ?></span>
@@ -102,6 +104,44 @@ render_header($conn, 'Profil ' . $profile['username']);
   <div class="stat-card"><b><?= $nVotesGiven ?></b><span>Vote diberikan</span></div>
   <div class="stat-card"><b class="<?= $rep > 0 ? 'rep-pos' : ($rep < 0 ? 'rep-neg' : '') ?>"><?= $rep ?></b><span>Reputasi</span></div>
 </div>
+
+<?php if ($isMe): ?>
+<details class="panel panel-pad" id="edit-profil" style="margin-bottom:14px">
+  <summary style="cursor:pointer;font-weight:700;display:flex;align-items:center;gap:8px">
+    <?= icon('user') ?> Edit profil
+  </summary>
+  <form action="edit_profile.php" method="post" enctype="multipart/form-data" style="margin-top:14px">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="avatar">
+    <div class="file-upload-wrapper">
+      <label class="file-upload-btn" for="avatarInput"><?= icon('image') ?> Ganti avatar</label>
+      <input type="file" name="avatar" id="avatarInput" accept="image/*">
+      <span class="file-name" id="fileName">Tidak ada file</span>
+      <button type="button" class="file-clear" id="fileClear">&times;</button>
+    </div>
+    <button type="submit" class="btn">Simpan avatar</button>
+    <p class="form-hint">Otomatis dikompres jadi maks 256px. Format: JPG, PNG, GIF, WebP.</p>
+  </form>
+  <hr>
+  <form action="edit_profile.php" method="post">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="password">
+    <div class="field">
+      <label for="curPass">Password saat ini</label>
+      <input type="password" id="curPass" name="current_password" required autocomplete="current-password">
+    </div>
+    <div class="field">
+      <label for="newPass">Password baru (min. 8 karakter)</label>
+      <input type="password" id="newPass" name="new_password" required minlength="8" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="confPass">Ulangi password baru</label>
+      <input type="password" id="confPass" name="confirm_password" required minlength="8" autocomplete="new-password">
+    </div>
+    <button type="submit" class="btn">Ganti password</button>
+  </form>
+</details>
+<?php endif; ?>
 
 <div class="panel">
   <p class="side-title" style="padding:14px 16px 0"><?= icon('chat') ?> Thread terbaru</p>

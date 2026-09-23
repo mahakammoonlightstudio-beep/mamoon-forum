@@ -1,143 +1,147 @@
-# Mamoon Forum 🌴
+# Mamoon Forum
 
-> Forum diskusi anonymous yang **ringan, cepat, dan tanpa iklan** — dibuat dengan PHP murni + MySQL, tanpa framework, tanpa build step.
+Forum diskusi ringan berbasis PHP murni dan MySQL, dengan dukungan posting anonim maupun akun terdaftar. Tanpa framework, tanpa build step, tanpa CDN eksternal - setiap halaman berukuran puluhan kilobyte dan tetap cepat di shared hosting.
 
-![PHP](https://img.shields.io/badge/PHP-%E2%89%A57.4-777bb3) ![MySQL](https://img.shields.io/badge/DB-MySQL%20%2F%20MariaDB-4479a1) ![License](https://img.shields.io/badge/License-MIT-green) ![Size](https://img.shields.io/badge/halaman-~25KB-success)
+![PHP](https://img.shields.io/badge/PHP-%3E%3D7.4-777bb3) ![MySQL](https://img.shields.io/badge/DB-MySQL%20%2F%20MariaDB-4479a1) ![License](https://img.shields.io/badge/License-MIT-green) ![Size](https://img.shields.io/badge/halaman-~25KB-success)
 
-Mamoon Forum adalah forum gaya imageboard/Reddit yang dioptimalkan untuk **kecepatan**: setiap halaman berukuran puluhan KB, tanpa CDN eksternal, tanpa JavaScript framework. Cocok dihosting di shared hosting gratisan seperti InfinityFree, 000webhost, atau VPS kecil.
+## Tangkapan Layar
 
----
+| Halaman utama | Detail thread |
+| --- | --- |
+| ![Halaman utama](docs/screenshot-index.png) | ![Detail thread](docs/screenshot-thread.png) |
 
-## ✨ Fitur
+| Profil pengguna | Mode gelap |
+| --- | --- |
+| ![Profil](docs/screenshot-profile.png) | ![Mode gelap](docs/screenshot-dark.png) |
 
-| Fitur | Keterangan |
-|---|---|
-| 🔒 **Hybrid auth** | Bisa posting anonim, atau daftar/masuk untuk fitur tambahan |
-| 🗂️ **Kategori** | Umum, Teknologi, Gaming, Hiburan, Bantu Saya (mudah diganti) |
-| 🔍 **Pencarian** | Cari thread dari judul & isi, tersedia di navbar |
-| 📌 **Sticky & Locked** | Pin thread penting, kunci thread yang sudah selesai |
-| 📄 **Pagination** | 20 thread/halaman di index, 15 balasan/halaman di thread |
-| 🖼️ **Kompresi gambar otomatis** | Upload di-resize maks 1280px → WebP/JPEG ~puluhan KB |
-| ⬆️ **Voting thread & balasan** | Upvote/downvote, klik ulang = batal, arah beda = pindah vote (tabel `votes`) |
-| 👤 **Halaman profil** | Statistik lengkap + thread & balasan terbaru, bisa diakses dari nama author |
-| 🔥 **Badge Hot** | Thread dengan skor vote ≥ 5 (bisa diatur di `config.php`) otomatis dapat badge |
-| 🏅 **Reputasi otomatis** | Skor vote (up − down) dari semua thread & balasan milik user, tampil di header |
-| 📶 **Sort Terbaru / Teratas** | Tab urutan thread: terbaru, atau teratas berdasar skor vote |
-| 🏅 **Reputasi otomatis** | Skor vote (up − down) dari semua thread & balasan milik user, tampil di header |
-| 🛡️ **Keamanan** | Prepared statements, CSRF token, honeypot anti-bot, rate limit, validasi MIME gambar, eksekusi PHP dimatikan di `uploads/` |
-| 🌙 **Tema gelap/terang** | Ikut preferensi sistem, tersimpan di localStorage |
-| 🔔 **Toast notification** | Notifikasi sukses/error, auto-hide |
-| ♻️ **Moderasi** | Moderator/admin bisa pin, kunci, hapus thread & balasan |
+## Fitur
 
-## ⚡ Kenapa ringan?
+- **Posting anonim atau akun terdaftar** - forum tetap berfungsi penuh tanpa login; akun hanya diperlukan untuk voting, avatar, dan moderasi.
+- **Kategori thread** - pengelompokan diskusi dengan warna dan penghitung thread.
+- **Pencarian** - pencarian judul dan isi thread langsung dari navbar.
+- **Sticky dan locked thread** - pin thread penting, kunci diskusi yang selesai.
+- **Voting thread dan balasan** - upvote/downvote dengan toggle (klik ulang membatalkan) dan switch (pindah arah); satu vote per pengguna per target, dijaga unique key di level database.
+- **Pengurutan Terbaru / Teratas** - tab urutan berdasarkan waktu aktif atau skor vote.
+- **Badge Hot** - thread dengan skor vote di atas ambang batas (dapat dikonfigurasi) ditandai otomatis.
+- **Reputasi** - akumulasi skor vote dari seluruh thread dan balasan milik pengguna, dihitung langsung dari data vote.
+- **Halaman profil** - statistik aktivitas beserta thread dan balasan terbaru.
+- **Edit profil** - ganti avatar (dikompres otomatis menjadi maksimal 256px) dan ganti password.
+- **Pagination** - 20 thread per halaman, 15 balasan per halaman.
+- **Kompresi gambar otomatis** - unggahan di-resize menjadi maksimal 1280px dan disimpan sebagai WebP/JPEG, umumnya puluhan KB.
+- **Tema terang dan gelap** - mengikuti preferensi sistem, tersimpan di localStorage.
+- **Notifikasi toast** - umpan balik sukses/gagal tanpa dialog bawaan browser.
 
-- **0 dependensi eksternal** — ikon pakai SVG inline, font pakai system font. Tidak ada Font Awesome / Google Fonts / jQuery.
-- **1 CSS (~6 KB) + 1 JS (~1 KB)** untuk seluruh situs, dimuat dengan `defer`.
-- **Gambar dikompres server-side** via GD saat upload — thread tetap kecil walau user upload foto besar.
-- **Cache yang benar**: aset statis di-cache 1 bulan, halaman PHP `no-store` — tidak ada lagi halaman "stuck" yang tidak mau update.
-- **gzip** aktif via `.htaccess`.
+## Persyaratan
 
-## 🚀 Instalasi
+- PHP 7.4 atau lebih baru dengan ekstensi `mysqli`, `gd`, `mbstring`, dan `fileinfo`
+- MySQL 5.7 / MariaDB 10.4 atau lebih baru
+- Apache dengan `mod_rewrite` (opsional, untuk gzip dan header cache) atau server web lain
 
-### 1. Clone / upload
+## Instalasi
 
-```bash
-git clone https://github.com/NAMA_KAMU/mamoon-forum.git
-```
+1. Salin proyek ke folder web server:
 
-Lalu upload semua file ke folder `htdocs/` hosting kamu (via FTP / File Manager / `git push` jika hosting mendukung).
+   ```bash
+   git clone https://github.com/mahakammoonlightstudio-beep/mamoon-forum.git
+   ```
 
-### 2. Buat database
+2. Buat database dan impor skema:
 
-**Instalasi baru** → import `database/schema.sql` lewat phpMyAdmin.
-**Upgrade dari versi lama** → import `database/upgrade.sql`, lalu `database/upgrade-votes.sql` (aman untuk data yang sudah ada).
+   ```bash
+   mysql -u USER -p NAMA_DATABASE < database/schema.sql
+   ```
 
-### 3. Konfigurasi
+   Untuk memutakhirkan database dari versi sebelumnya, jalankan pula `database/upgrade.sql` dan `database/upgrade-votes.sql`. Kedua berkas aman terhadap data yang sudah ada.
 
-```bash
-cp config.example.php config.php
-```
+3. Salin konfigurasi dan sesuaikan kredensial:
 
-Lalu isi `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME` sesuai kredensial hosting kamu. `config.php` sudah ada di `.gitignore` — jangan pernah di-commit.
+   ```bash
+   cp config.example.php config.php
+   ```
 
-### 4. Selesai!
+   Isi `DB_HOST`, `DB_USER`, `DB_PASS`, dan `DB_NAME`. Berkas `config.php` telah terdaftar di `.gitignore` dan tidak boleh ikut ke repositori.
 
-Buka domain kamu — forum siap dipakai. 🎉
+4. Pastikan folder `uploads/` dapat ditulisi oleh PHP. Folder dan berkas `.htaccess` pelindungnya sudah disertakan di repositori.
 
-### Menjalankan secara lokal (XAMPP/Laragon)
+5. (Opsional, untuk pengujian lokal) Isi data contoh:
+
+   ```bash
+   mysql -u USER -p NAMA_DATABASE < database/seed-demo.sql
+   ```
+
+   Seluruh akun demo menggunakan password `password123`. Berkas ini menghapus data pada tabel utama dan hanya untuk lingkungan pengembangan.
+
+## Menjalankan secara lokal
+
+PHP bawaan cukup untuk pengembangan:
 
 ```bash
 php -S localhost:8000
 ```
 
-(letakkan proyek di folder `htdocs`, lalu akses `http://localhost:8000`)
+Pengguna Herd (macOS/Windows) dapat memakai biner PHP yang terpasang, misalnya `~/.config/herd/bin/php84/php.exe` pada Windows.
 
-## 📁 Struktur proyek
+## Struktur Proyek
 
 ```
 mamoon-forum/
-├── index.php          # Daftar thread + form thread baru
-├── thread.php         # Detail thread + balasan
-├── post_thread.php    # Handler POST thread
-├── post_reply.php     # Handler POST balasan
-├── vote.php           # Endpoint vote thread/balasan (POST)
-├── profile.php        # Profil user + statistik + aktivitas
-├── mod_thread.php     # Aksi moderator (pin/lock/delete)
-├── login.php          # Login (opsional)
-├── register.php       # Daftar akun (opsional)
-├── logout.php         # Logout
-├── db.php             # Koneksi database
-├── config.example.php # Contoh konfigurasi (config.php = lokal saja)
-├── .htaccess          # Gzip, cache, keamanan
+├── index.php              # Daftar thread (kategori, pencarian, sort, badge Hot)
+├── thread.php             # Detail thread dan balasan
+├── post_thread.php        # Handler pembuatan thread
+├── post_reply.php         # Handler balasan
+├── vote.php               # Endpoint vote (POST)
+├── profile.php            # Profil pengguna
+├── edit_profile.php       # Ganti avatar dan password
+├── mod_thread.php         # Aksi moderator
+├── login.php              # Masuk
+├── register.php           # Daftar akun
+├── logout.php             # Keluar
+├── db.php                 # Koneksi database
+├── config.example.php     # Contoh konfigurasi
 ├── assets/
-│   ├── style.css      # Seluruh styling (tema terang/gelap)
-│   └── app.js         # Tema, upload UI, toast
+│   ├── style.css          # Seluruh gaya (tema terang/gelap, ~8 KB)
+│   └── app.js             # Tema, unggahan, toast (~1.5 KB)
 ├── lib/
-│   ├── helpers.php    # Session, CSRF, flash, rate limit, honeypot
-│   ├── auth.php       # Login/register/logout
-│   ├── images.php     # Kompresi gambar via GD
-│   ├── votes.php      # Skor vote, toggle/switch, widget vote box
-│   └── layout.php     # Header/footer + ikon SVG
+│   ├── helpers.php        # Session, CSRF, rate limit, honeypot
+│   ├── auth.php           # Login/daftar/logout, reputasi
+│   ├── images.php         # Kompresi gambar via GD
+│   ├── votes.php          # Skor vote dan widget voting
+│   └── layout.php         # Header/footer dan ikon SVG
 ├── database/
 │   ├── schema.sql         # Skema untuk instalasi baru
-│   ├── upgrade.sql        # Upgrade dari database lama
-│   └── upgrade-votes.sql  # Tambah fitur voting (database lama)
-└── uploads/           # Gambar hasil upload (auto-created)
+│   ├── upgrade.sql        # Pemutakhiran dari basis lama
+│   ├── upgrade-votes.sql  # Pemutakhiran untuk fitur voting
+│   └── seed-demo.sql      # Data demo (khusus pengembangan)
+└── uploads/               # Gambar hasil unggahan
 ```
 
-## 🛠️ Teknologi
+## Catatan Keamanan
 
-- **PHP ≥ 7.4** (diuji hingga PHP 8.x) — tanpa framework, tanpa composer
-- **MySQL / MariaDB** dengan `utf8mb4` penuh
-- **GD** untuk kompresi gambar (bawaan hampir semua hosting PHP)
-- Vanilla CSS + JavaScript
+- Seluruh query menggunakan prepared statements.
+- Seluruh output di-escape dengan `htmlspecialchars`.
+- Setiap form POST dilindungi CSRF token per sesi.
+- Unggahan gambar divalidasi dari isi berkas (bukan ekstensi), diproses ulang melalui GD, dan folder `uploads/` menonaktifkan eksekusi PHP.
+- Rate limit per IP untuk pembuatan thread, balasan, vote, login, pendaftaran, dan edit profil.
+- Honeypot field untuk menggagalkan spam bot sederhana.
+- Password disimpan menggunakan `password_hash()` (bcrypt).
+- URL tujuan setelah aksi divalidasi untuk mencegah open redirect.
 
-## 🔐 Catatan keamanan
+Disarankan menjalankan forum di atas HTTPS. InfinityFree menyediakan SSL gratis.
 
-- Semua query memakai **prepared statements** (anti SQL injection).
-- Semua output di-escape (`htmlspecialchars`) (anti XSS).
-- Form POST dilindungi **CSRF token** per-session.
-- Upload gambar divalidasi dari **isi file** (bukan ekstensi), di-resize ulang via GD (membuang payload berbahaya), dan folder `uploads/` **tidak bisa mengeksekusi PHP**.
-- **Rate limit** per-IP untuk posting thread, balasan, vote, login, dan register (tabel `rate_limits`).
-- **Vote** wajib login dan satu vote per user per target — dicegah duplikasi di level database (unique key).
-- **Reputasi** dihitung live dari vote yang diterima konten user (tidak bisa dimanipulasi lewat kolom manual).
-- **Honeypot field** menggagalan spam bot sederhana.
-- Password disimpan sebagai `password_hash()` bcrypt.
+## Roadmap
 
-> Rekomendasi: sebelum dipakai publik, jalankan di HTTPS (InfinityFree menyediakan SSL gratis).
+- [x] Voting thread dan balasan
+- [x] Pengurutan Terbaru / Teratas
+- [x] Reputasi pengguna
+- [x] Halaman dan edit profil
+- [ ] Balasan bertingkat (nested comments)
+- [ ] Panel admin
+- [ ] Umpan RSS per kategori
 
-## 🗺️ Roadmap
+## Kontribusi
 
-- [x] ~~Voting thread/balasan~~ (selesai — upvote/downvote dengan toggle)
-- [ ] Balasan bertingkat (nested comments, tabel `comments`)
-- [ ] Panel admin (kelola kategori & user)
-- [ ] Umpan RSS per-kategori
-- [ ] WebP fallback detection
+Kontribusi dipersilakan melalui fork, branch, dan pull request. Untuk perubahan besar, mohon diskusikan terlebih dahulu melalui issue.
 
-## 🤝 Kontribusi
+## Lisensi
 
-PR, issue, dan saran dipersilakan! Cukup fork → branch → commit → PR.
-
-## 📄 Lisensi
-
-[Distributed under the MIT License](LICENSE) — bebas dipakai, dimodifikasi, dan didistribusikan.
+Didistribusikan di bawah [Lisensi MIT](LICENSE).

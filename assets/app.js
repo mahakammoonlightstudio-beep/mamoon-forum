@@ -2,7 +2,12 @@
 (function () {
   'use strict';
 
-  /* Toggle tema terang/gelap */
+  /* Toggle tema terang/gelap; dukung ?theme=dark|light (tautan tetap konsisten) */
+  var qTheme = new URLSearchParams(location.search).get('theme');
+  if (qTheme === 'dark' || qTheme === 'light') {
+    document.documentElement.setAttribute('data-theme', qTheme);
+  }
+
   var btn = document.getElementById('theme-toggle');
   if (btn) {
     btn.addEventListener('click', function () {
