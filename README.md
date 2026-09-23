@@ -4,7 +4,7 @@ Forum diskusi ringan berbasis PHP murni dan MySQL, dengan dukungan posting anoni
 
 **Live demo: <https://mamoon-forum.rf.gd/>**
 
-![PHP](https://img.shields.io/badge/PHP-%3E%3D7.4-777bb3) ![MySQL](https://img.shields.io/badge/DB-MySQL%20%2F%20MariaDB-4479a1) ![License](https://img.shields.io/badge/License-MIT-green) ![Size](https://img.shields.io/badge/halaman-~25KB-success)
+![PHP](https://img.shields.io/badge/PHP-%3E%3D7.4-777bb3) ![MySQL](https://img.shields.io/badge/DB-MySQL%20%2F%20MariaDB-4479a1) ![License](https://img.shields.io/badge/License-CC%20BY%204.0-blue) ![Size](https://img.shields.io/badge/halaman-~25KB-success)
 
 ## Tangkapan Layar
 
@@ -164,4 +164,4 @@ Kontribusi dipersilakan melalui fork, branch, dan pull request. Untuk perubahan 
 
 ## Lisensi
 
-Didistribusikan di bawah [Lisensi MIT](LICENSE).
+Didistribusikan di bawah [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE). Kode dan aset bebas digunakan, dimodifikasi, dan didistribusikan - termasuk untuk keperluan komersial - selama memberikan kredit kepada Mahakam Moonlight Studio.
