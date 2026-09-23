@@ -26,6 +26,7 @@ Forum diskusi ringan berbasis PHP murni dan MySQL, dengan dukungan posting anoni
 - **Reputasi** - akumulasi skor vote dari seluruh thread dan balasan milik pengguna, dihitung langsung dari data vote.
 - **Halaman profil** - statistik aktivitas beserta thread dan balasan terbaru.
 - **Edit profil** - ganti avatar (dikompres otomatis menjadi maksimal 256px) dan ganti password.
+- **Edit thread dan balasan** - pembuat dapat mengubah judul, isi, dan gambarnya; perubahan ditandai "(diedit)". Moderator dapat mengedit semua konten.
 - **Pagination** - 20 thread per halaman, 15 balasan per halaman.
 - **Kompresi gambar otomatis** - unggahan di-resize menjadi maksimal 1280px dan disimpan sebagai WebP/JPEG, umumnya puluhan KB.
 - **Tema terang dan gelap** - mengikuti preferensi sistem, tersimpan di localStorage.
@@ -51,7 +52,7 @@ Forum diskusi ringan berbasis PHP murni dan MySQL, dengan dukungan posting anoni
    mysql -u USER -p NAMA_DATABASE < database/schema.sql
    ```
 
-   Untuk memutakhirkan database dari versi sebelumnya, jalankan pula `database/upgrade.sql` dan `database/upgrade-votes.sql`. Kedua berkas aman terhadap data yang sudah ada.
+   Untuk memutakhirkan database dari versi sebelumnya, jalankan pula `database/upgrade.sql`, `database/upgrade-votes.sql`, dan `database/upgrade-edit.sql`. Ketiganya aman terhadap data yang sudah ada.
 
 3. Salin konfigurasi dan sesuaikan kredensial:
 
@@ -92,6 +93,7 @@ mamoon-forum/
 ├── vote.php               # Endpoint vote (POST)
 ├── profile.php            # Profil pengguna
 ├── edit_profile.php       # Ganti avatar dan password
+├── edit.php               # Edit thread/balasan oleh pembuatnya
 ├── mod_thread.php         # Aksi moderator
 ├── login.php              # Masuk
 ├── register.php           # Daftar akun
@@ -111,6 +113,7 @@ mamoon-forum/
 │   ├── schema.sql         # Skema untuk instalasi baru
 │   ├── upgrade.sql        # Pemutakhiran dari basis lama
 │   ├── upgrade-votes.sql  # Pemutakhiran untuk fitur voting
+│   ├── upgrade-edit.sql   # Pemutakhiran untuk fitur edit konten
 │   └── seed-demo.sql      # Data demo (khusus pengembangan)
 └── uploads/               # Gambar hasil unggahan
 ```

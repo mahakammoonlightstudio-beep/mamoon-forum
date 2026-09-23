@@ -49,7 +49,7 @@ $page       = min(max(1, (int)($_GET['p'] ?? 1)), $totalPages);
 $offset     = ($page - 1) * $perPage;
 
 $stmt = $conn->prepare(
-    'SELECT p.id, p.content, p.image_path, p.created_at, p.user_id, u.username AS author_name
+    'SELECT p.id, p.content, p.image_path, p.created_at, p.edited_at, p.user_id, u.username AS author_name
      FROM posts p LEFT JOIN users u ON u.id = p.user_id
      WHERE p.thread_id = ?
      ORDER BY p.created_at ASC, p.id ASC LIMIT ? OFFSET ?'
@@ -102,6 +102,10 @@ render_header($conn, (string)$thread['title']);
     </span>
     <span class="item"><?= icon('clock') ?> <?= e(time_ago((string)$thread['created_at'])) ?></span>
     <span class="item">#<?= $id ?></span>
+    <?php if (($thread['edited_at'] ?? null) !== null): ?><span class="edited-mark">(diedit)</span><?php endif; ?>
+    <?php if ($user !== null && ((int)$thread['user_id'] === (int)$user['id'] || $isMod)): ?>
+      <a class="link-btn" href="edit.php?type=thread&amp;id=<?= $id ?>">Edit</a>
+    <?php endif; ?>
     <?php if ($isMod): ?>
       <span class="mod-actions">
         <form method="post" action="mod_thread.php" class="inline-form"><?= csrf_field() ?>
@@ -134,7 +138,12 @@ render_header($conn, (string)$thread['title']);
     <div class="reply-head">
       <span class="avatar"><?= e(mb_strtoupper(mb_substr($post['author_name'] !== null ? (string)$post['author_name'] : 'A', 0, 1))) ?></span>
       <span class="reply-author"><?php if ($post['author_name'] !== null): ?><a href="profile.php?u=<?= e((string)$post['author_name']) ?>"><?= e((string)$post['author_name']) ?></a><?php else: ?>Anonim<?php endif; ?></span>
-      <span class="date">#<?= (int)$post['id'] ?> &middot; <?= e(time_ago((string)$post['created_at'])) ?></span>
+      <span class="date">#<?= (int)$post['id'] ?> &middot; <?= e(time_ago((string)$post['created_at'])) ?>
+        <?php if (($post['edited_at'] ?? null) !== null): ?><span class="edited-mark">(diedit)</span><?php endif; ?>
+      </span>
+      <?php if ($user !== null && ((int)$post['user_id'] === (int)$user['id'] || $isMod)): ?>
+        <a class="link-btn" href="edit.php?type=post&amp;id=<?= $pid ?>">Edit</a>
+      <?php endif; ?>
       <?php if ($isMod): ?>
         <span class="mod-actions">
           <form method="post" action="mod_thread.php" class="inline-form" onsubmit="return confirm('Hapus balasan ini?')"><?= csrf_field() ?>
