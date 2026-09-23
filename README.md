@@ -2,6 +2,8 @@
 
 Forum diskusi ringan berbasis PHP murni dan MySQL, dengan dukungan posting anonim maupun akun terdaftar. Tanpa framework, tanpa build step, tanpa CDN eksternal - setiap halaman berukuran puluhan kilobyte dan tetap cepat di shared hosting.
 
+**Live demo: <https://mamoon-forum.rf.gd/>**
+
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D7.4-777bb3) ![MySQL](https://img.shields.io/badge/DB-MySQL%20%2F%20MariaDB-4479a1) ![License](https://img.shields.io/badge/License-MIT-green) ![Size](https://img.shields.io/badge/halaman-~25KB-success)
 
 ## Tangkapan Layar
@@ -80,7 +82,11 @@ PHP bawaan cukup untuk pengembangan:
 php -S localhost:8000
 ```
 
-Pengguna Herd (macOS/Windows) dapat memakai biner PHP yang terpasang, misalnya `~/.config/herd/bin/php84/php.exe` pada Windows.
+Pengguna Laravel Herd (macOS/Windows) dapat memakai biner PHP yang terpasang, misalnya `~/.config/herd/bin/php84/php.exe` pada Windows:
+
+```bash
+~/.config/herd/bin/php84/php.exe -S localhost:8000
+```
 
 ## Struktur Proyek
 
@@ -115,6 +121,7 @@ mamoon-forum/
 │   ├── upgrade-votes.sql  # Pemutakhiran untuk fitur voting
 │   ├── upgrade-edit.sql   # Pemutakhiran untuk fitur edit konten
 │   └── seed-demo.sql      # Data demo (khusus pengembangan)
+├── docs/                  # Tangkapan layar untuk dokumentasi
 └── uploads/               # Gambar hasil unggahan
 ```
 
@@ -133,13 +140,23 @@ Disarankan menjalankan forum di atas HTTPS. InfinityFree menyediakan SSL gratis.
 
 ## Roadmap
 
-- [x] Voting thread dan balasan
-- [x] Pengurutan Terbaru / Teratas
-- [x] Reputasi pengguna
-- [x] Halaman dan edit profil
-- [ ] Balasan bertingkat (nested comments)
-- [ ] Panel admin
-- [ ] Umpan RSS per kategori
+### Selesai
+
+- Voting thread dan balasan dengan anti-duplikat di level database
+- Pengurutan Terbaru / Teratas
+- Reputasi pengguna
+- Halaman profil dan edit profil (avatar, password)
+- Edit thread dan balasan oleh pembuatnya
+
+### Direncanakan
+
+- Balasan bertingkat (nested comments)
+- Panel admin
+- Umpan RSS per kategori
+
+## Pengembangan Berbantuan AI
+
+Proyek ini dikembangkan dengan bantuan AI pair-programming ([Codebuff](https://www.codebuff.com)) untuk mempercepat penulisan dan pengujian kode. Seluruh arsitektur, keputusan teknis, dan implementasi direview serta dipahami penuh oleh pengembang manusia - termasuk penggunaan unique key di level database untuk menjamin satu vote per pengguna, pemrosesan ulang unggahan melalui GD untuk memvalidasi gambar, dan pemilihan bcrypt untuk penyimpanan password.
 
 ## Kontribusi
 
