@@ -23,3 +23,6 @@ const MAX_POST_LEN  = 2000;  // panjang maksimum isi thread/balasan
 const MAX_IMAGE_BYTES = 3145728; // 3 MB sebelum dikompres
 const MAX_IMAGE_DIM   = 1280;    // sisi terpanjang setelah resize (px)
 const IMAGE_QUALITY   = 82;      // kualitas JPEG/WebP hasil kompresi
+
+// --- Fitur ---
+const HOT_VOTE_SCORE = 5;   // skor vote minimum agar thread dapat badge Hot

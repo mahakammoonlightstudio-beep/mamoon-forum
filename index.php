@@ -1,7 +1,8 @@
 <?php
 /**
  * Halaman utama: daftar thread + form thread baru.
- * Fitur: kategori, pencarian, sticky, pagination, reply count.
+ * Fitur: kategori, pencarian, sticky, pagination, reply count,
+ * sort terbaru/teratas, badge Hot, skor vote.
  */
 declare(strict_types=1);
 
@@ -65,11 +66,13 @@ $order = $sort === 'top'
     : 't.sticky DESC, t.bump_at DESC';
 
 $sql = "SELECT t.id, t.title, t.content, t.created_at, t.bump_at, t.sticky, t.locked,
+        t.user_id, u.username AS author_name,
         c.name AS cat_name, c.color AS cat_color, c.slug AS cat_slug,
         (SELECT COUNT(*) FROM posts p WHERE p.thread_id = t.id) AS reply_count,
         $voteScoreSql
         FROM threads t
         LEFT JOIN categories c ON c.id = t.category_id
+        LEFT JOIN users u ON u.id = t.user_id
         WHERE $where
         ORDER BY $order
         LIMIT ? OFFSET ?";
@@ -183,6 +186,7 @@ render_header($conn, $cat !== null ? (string)$cat['name'] : 'Diskusi');
             <h2>
               <?php if ((int)$row['sticky']): ?><span class="badge badge-pin"><?= icon('pin') ?>Pin</span><?php endif; ?>
               <?php if ((int)$row['locked']): ?><span class="badge badge-lock"><?= icon('lock') ?>Terkunci</span><?php endif; ?>
+              <?php if ($score >= HOT_VOTE_SCORE): ?><span class="badge badge-hot"><?= icon('flame') ?>Hot</span><?php endif; ?>
               <?php if ($row['cat_name'] !== null): ?>
                 <span class="chip" style="background:<?= e((string)$row['cat_color']) ?>"><?= e((string)$row['cat_name']) ?></span>
               <?php endif; ?>
@@ -190,6 +194,7 @@ render_header($conn, $cat !== null ? (string)$cat['name'] : 'Diskusi');
             </h2>
             <p class="snippet"><?= e(mb_substr(preg_replace('/\s+/u', ' ', (string)$row['content']) ?? '', 0, 140)) ?></p>
             <div class="thread-meta">
+              <span class="item"><?= icon('user') ?> <?= e($row['author_name'] ?? 'Anonim') ?></span>
               <span class="item"><?= icon('chat') ?> <?= (int)$row['reply_count'] ?> balasan</span>
               <span class="item"><?= icon('clock') ?> <?= e(time_ago((string)$row['bump_at'])) ?></span>
               <span class="item"><?= icon('arrow-up') ?> <?= $score ?></span>

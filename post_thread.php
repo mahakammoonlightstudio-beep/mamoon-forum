@@ -40,17 +40,18 @@ if (mb_strlen($title) > MAX_TITLE_LEN || mb_strlen($content) > MAX_POST_LEN) {
     redirect('index.php?' . flash('error', 'Terlalu panjang! Judul maks ' . MAX_TITLE_LEN . ', isi maks ' . MAX_POST_LEN . ' karakter.'));
 }
 
-// Kategori harus benar-benar ada bila diisi.
+// Kategori harus benar-benar ada bila diisi; selain itu NULL (tanpa kategori).
+// Catatan: NULL, bukan 0 — kolom ini punya foreign key ke categories.
 if ($catId > 0) {
     $stmt = $conn->prepare('SELECT id FROM categories WHERE id = ? LIMIT 1');
     bind_and_execute($stmt, 'i', [$catId]);
     $ok = $stmt->get_result()->fetch_assoc() !== null;
     $stmt->close();
     if (!$ok) {
-        $catId = 0;
+        $catId = null;
     }
 } else {
-    $catId = 0;
+    $catId = null;
 }
 
 // Gambar (otomatis dikompres).

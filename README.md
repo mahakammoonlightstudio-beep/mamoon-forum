@@ -19,6 +19,9 @@ Mamoon Forum adalah forum gaya imageboard/Reddit yang dioptimalkan untuk **kecep
 | 📄 **Pagination** | 20 thread/halaman di index, 15 balasan/halaman di thread |
 | 🖼️ **Kompresi gambar otomatis** | Upload di-resize maks 1280px → WebP/JPEG ~puluhan KB |
 | ⬆️ **Voting thread & balasan** | Upvote/downvote, klik ulang = batal, arah beda = pindah vote (tabel `votes`) |
+| 👤 **Halaman profil** | Statistik lengkap + thread & balasan terbaru, bisa diakses dari nama author |
+| 🔥 **Badge Hot** | Thread dengan skor vote ≥ 5 (bisa diatur di `config.php`) otomatis dapat badge |
+| 🏅 **Reputasi otomatis** | Skor vote (up − down) dari semua thread & balasan milik user, tampil di header |
 | 📶 **Sort Terbaru / Teratas** | Tab urutan thread: terbaru, atau teratas berdasar skor vote |
 | 🏅 **Reputasi otomatis** | Skor vote (up − down) dari semua thread & balasan milik user, tampil di header |
 | 🛡️ **Keamanan** | Prepared statements, CSRF token, honeypot anti-bot, rate limit, validasi MIME gambar, eksekusi PHP dimatikan di `uploads/` |
@@ -78,6 +81,7 @@ mamoon-forum/
 ├── post_thread.php    # Handler POST thread
 ├── post_reply.php     # Handler POST balasan
 ├── vote.php           # Endpoint vote thread/balasan (POST)
+├── profile.php        # Profil user + statistik + aktivitas
 ├── mod_thread.php     # Aksi moderator (pin/lock/delete)
 ├── login.php          # Login (opsional)
 ├── register.php       # Daftar akun (opsional)

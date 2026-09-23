@@ -17,8 +17,10 @@ if ($id <= 0) {
 
 // ---------- Data thread ----------
 $stmt = $conn->prepare(
-    'SELECT t.*, c.name AS cat_name, c.color AS cat_color
-     FROM threads t LEFT JOIN categories c ON c.id = t.category_id
+    'SELECT t.*, c.name AS cat_name, c.color AS cat_color, u.username AS author_name
+     FROM threads t
+     LEFT JOIN categories c ON c.id = t.category_id
+     LEFT JOIN users u ON u.id = t.user_id
      WHERE t.id = ? LIMIT 1'
 );
 bind_and_execute($stmt, 'i', [$id]);
@@ -46,7 +48,12 @@ $totalPages = max(1, (int)ceil($total / $perPage));
 $page       = min(max(1, (int)($_GET['p'] ?? 1)), $totalPages);
 $offset     = ($page - 1) * $perPage;
 
-$stmt = $conn->prepare('SELECT id, content, image_path, created_at FROM posts WHERE thread_id = ? ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?');
+$stmt = $conn->prepare(
+    'SELECT p.id, p.content, p.image_path, p.created_at, p.user_id, u.username AS author_name
+     FROM posts p LEFT JOIN users u ON u.id = p.user_id
+     WHERE p.thread_id = ?
+     ORDER BY p.created_at ASC, p.id ASC LIMIT ? OFFSET ?'
+);
 bind_and_execute($stmt, 'iii', [$id, $perPage, $offset]);
 $replies = $stmt->get_result();
 $stmt->close();
@@ -65,6 +72,8 @@ $opScores = vote_scores($conn, 'thread', [$id]);
 $opScore  = $opScores[$id]['score'] ?? 0;
 $opMyVote = $user !== null ? (user_votes($conn, (int)$user['id'], 'thread', [$id])[$id] ?? null) : null;
 
+$opAuthor = $thread['author_name'] ?? null;
+
 render_header($conn, (string)$thread['title']);
 ?>
 
@@ -74,6 +83,7 @@ render_header($conn, (string)$thread['title']);
   <h2>
     <?php if ((int)$thread['sticky']): ?><span class="badge badge-pin"><?= icon('pin') ?>Pin</span><?php endif; ?>
     <?php if ($lock): ?><span class="badge badge-lock"><?= icon('lock') ?>Terkunci</span><?php endif; ?>
+    <?php if ($opScore >= HOT_VOTE_SCORE): ?><span class="badge badge-hot"><?= icon('flame') ?>Hot</span><?php endif; ?>
     <?php if ($thread['cat_name'] !== null): ?>
       <a class="chip" style="background:<?= e((string)$thread['cat_color']) ?>" href="index.php?cat=<?= e((string)($thread['cat_slug'] ?? '')) ?>"><?= e((string)$thread['cat_name']) ?></a>
     <?php endif; ?>
@@ -87,7 +97,9 @@ render_header($conn, (string)$thread['title']);
   <?php endif; ?>
   <?= render_vote_box('thread', $id, $opScore, $opMyVote) ?>
   <div class="thread-meta">
-    <span class="item"><span class="avatar" style="width:22px;height:22px;font-size:11px">A</span> Anonim</span>
+    <span class="item"><span class="avatar" style="width:22px;height:22px;font-size:11px"><?= e(mb_strtoupper(mb_substr($opAuthor !== null ? (string)$opAuthor : 'A', 0, 1))) ?></span>
+      <?php if ($opAuthor !== null): ?><a href="profile.php?u=<?= e((string)$opAuthor) ?>"><?= e((string)$opAuthor) ?></a><?php else: ?>Anonim<?php endif; ?>
+    </span>
     <span class="item"><?= icon('clock') ?> <?= e(time_ago((string)$thread['created_at'])) ?></span>
     <span class="item">#<?= $id ?></span>
     <?php if ($isMod): ?>
@@ -120,8 +132,8 @@ render_header($conn, (string)$thread['title']);
     <?= render_vote_box('post', $pid, $postScores[$pid]['score'] ?? 0, $postMyVotes[$pid] ?? null) ?>
     <div class="reply-main">
     <div class="reply-head">
-      <span class="avatar">A</span>
-      <span class="reply-author">Anonim</span>
+      <span class="avatar"><?= e(mb_strtoupper(mb_substr($post['author_name'] !== null ? (string)$post['author_name'] : 'A', 0, 1))) ?></span>
+      <span class="reply-author"><?php if ($post['author_name'] !== null): ?><a href="profile.php?u=<?= e((string)$post['author_name']) ?>"><?= e((string)$post['author_name']) ?></a><?php else: ?>Anonim<?php endif; ?></span>
       <span class="date">#<?= (int)$post['id'] ?> &middot; <?= e(time_ago((string)$post['created_at'])) ?></span>
       <?php if ($isMod): ?>
         <span class="mod-actions">

@@ -1,6 +1,9 @@
 -- ============================================================
 -- Mamoon Forum — skema database (install baru)
 -- MariaDB 10.4+ / MySQL 5.7+  |  Charset utf8mb4
+--
+-- Urutan tabel penting: users dibuat SEBELUM threads & posts
+-- karena kedua tabel itu punya foreign key ke users.
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -18,6 +21,25 @@ CREATE TABLE `categories` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- User (opsional — auth hybrid)
+-- ------------------------------------------------------------
+CREATE TABLE `users` (
+  `id`            INT NOT NULL AUTO_INCREMENT,
+  `username`      VARCHAR(50) NOT NULL,
+  `email`         VARCHAR(255) NOT NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `avatar_url`    VARCHAR(512) DEFAULT NULL,
+  `role`          ENUM('user','moderator','admin') DEFAULT 'user',
+  `is_active`     TINYINT(1) DEFAULT 1,
+  `reputation`    INT DEFAULT 0,
+  `created_at`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
+  `last_login_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
@@ -66,25 +88,6 @@ CREATE TABLE `posts` (
   CONSTRAINT `fk_posts_user`
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
     ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ------------------------------------------------------------
--- User (opsional — auth hybrid)
--- ------------------------------------------------------------
-CREATE TABLE `users` (
-  `id`            INT NOT NULL AUTO_INCREMENT,
-  `username`      VARCHAR(50) NOT NULL,
-  `email`         VARCHAR(255) NOT NULL,
-  `password_hash` VARCHAR(255) NOT NULL,
-  `avatar_url`    VARCHAR(512) DEFAULT NULL,
-  `role`          ENUM('user','moderator','admin') DEFAULT 'user',
-  `is_active`     TINYINT(1) DEFAULT 1,
-  `reputation`    INT DEFAULT 0,
-  `created_at`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
-  `last_login_at` TIMESTAMP NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------

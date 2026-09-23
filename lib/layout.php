@@ -28,6 +28,7 @@ function icon(string $name): string
         'check'   => '<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 5-5"/>',
         'arrow-up'   => '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',
         'arrow-down' => '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+        'flame'      => '<path d="M12 22c4.4 0 8-3.4 8-7.6 0-3-1.7-5-3.2-6.9-.8-1-1.9-2.3-2.8-3.5-.5 2.2-1.4 3.4-2.7 4.5C9.6 10 8 8.5 8.3 6c-2 2-4.3 5.2-4.3 8.4C4 18.6 7.6 22 12 22Z"/><path d="M12 22c2.2 0 4-1.7 4-3.8 0-1.5-.8-2.6-1.6-3.6-.5-.6-1-1.4-1.4-2.2-.9 1.2-2.8 2-2.6 4 .1 1-.6 1.4-1.1 1.2-.8-.3-1.3-1.4-1.1-2.6-.8.9-1.2 2-1.2 3.2 0 2.1 1.8 3.8 4 3.8Z"/>',
     ];
     $p = $paths[$name] ?? $paths['chat'];
     return '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' . $p . '</svg>';
@@ -96,7 +97,7 @@ function render_header(mysqli $db, string $title, bool $showSearch = true): void
       <?php endif; ?>
       <?php if ($user): ?>
         <?php $rep = user_reputation($db, (int)$user['id']); ?>
-        <a class="user-chip" href="#" title="Reputasi: <?= $rep ?>"><?= icon('user') ?><span><?= e($user['username']) ?></span><em><?= e($user['role']) ?></em><span class="rep" title="Reputasi"><?= icon('arrow-up') ?><?= $rep ?></span></a>
+        <a class="user-chip" href="profile.php?u=<?= e((string)$user['username']) ?>" title="Reputasi: <?= $rep ?>"><?= icon('user') ?><span><?= e($user['username']) ?></span><em><?= e($user['role']) ?></em><span class="rep" title="Reputasi"><?= icon('arrow-up') ?><?= $rep ?></span></a>
         <form method="post" action="logout.php" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost btn-icon" title="Keluar"><?= icon('logout') ?></button></form>
       <?php else: ?>
         <a class="btn btn-ghost" href="login.php">Masuk</a>
